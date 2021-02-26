@@ -1,0 +1,61 @@
+use test
+
+sample_record={"_id":{"loc":[170.225,60.025],"validTime":1614319200},"calcs":[{"refTime":1608487200,"TMP":0},{"refTime":1608487200,"TMP":36},{"refTime":1608487200,"TMP":-62},{"refTime":1608487200,"TMP":10135951}]}
+
+//both validTime and refTime must be have that hours mod 6 is 0, and refTime must be before validTime
+validTime=ISODate("2021-02-26T06:00:00.000Z")   //time the forecast is valid
+refTime=ISODate("2021-02-25T06:00:00.000Z")     //time the forecast was calculated
+index=((validTime-refTime)/(1000*60*60)/6)-1    //the position in the array to insert the observation
+
+BULK_SIZE = 1000
+bulk=[]
+startTime=new Date()
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+function flushBulk() {
+  db.weather.bulkWrite(bulk, {ordered: false})
+  bulk.length=0
+}
+
+function addBulkElement(elem) {
+  bulk.push(elem)
+  if(bulk.length >= BULK_SIZE) {
+    flushBulk()
+  }
+}
+
+LAT_START = -120
+LAT_END   = 120
+LON_START = -80
+LON_END   = 80
+GRID_RESOLUTION = 1
+SERIES_SIZE=1156
+
+sample_record.calcs=[]
+sample_record.calcs.length=SERIES_SIZE
+
+//create the initial array
+if(db.weather.find({'_id.validTime': validTime}).count() == 0) {
+  for (i=LAT_START; i <= LAT_END && LAT_START <= LAT_END; i=i+GRID_RESOLUTION) {
+    for (j=LON_START; j <= LON_END && LON_START <= LON_END; j=j+GRID_RESOLUTION) {
+      sample_record._id.loc=[i,j]
+      sample_record._id.validTime=validTime
+      addBulkElement({ insertOne : { "document" : {_id: {loc: [i,j], validTime: validTime}, calcs:  sample_record.calcs} }})
+    }
+  }
+}
+flushBulk()
+//update with some random data
+for (i=LAT_START; i <= LAT_END && LAT_START <= LAT_END; i=i+GRID_RESOLUTION) {
+  for (j=LON_START; j <= LON_END && LON_START <= LON_END; j=j+GRID_RESOLUTION) {
+    addBulkElement({ updateOne : {filter: {'_id': {loc: [i,j], 'validTime': validTime}}, update: {$set: {[`calcs.${index}`]: getRandomInt(50)}}}})
+  }
+}
+flushBulk()
+endTime=new Date()
+endTime-startTime
+
+
