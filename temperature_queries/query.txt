@@ -1,0 +1,58 @@
+#min/max/avg temperature at Svalbard
+
+[{$match: {
+  countries: 'Svalbard'
+}}, {$lookup: {
+  from: 'temperature_data',
+  let: {loc_id: "$_id"},
+  pipeline: [
+    {
+      $match: {
+        $expr: {
+          $and: [
+            {$eq: ["$_id.loc", "$$loc_id"]},
+            {$gte: ["$_id.validTime", ISODate('2021-03-11T06:00:00.000+00:00')]},
+            {$lte: ["$_id.validTime", ISODate('2021-04-11T06:00:00.000+00:00')]}
+          ]
+        }
+      }
+    },
+    {$sort: {"_id.validTime":1}}],
+  as: 'calcs'
+}}, {$unwind: {
+  path: '$calcs'
+}}, {$group: {
+  _id: null,
+  count: {
+    $sum: 1
+  },
+  avg: {
+    $avg: '$calcs.observation.temperature'
+  },
+  min: {
+    $min: '$calcs.observation.temperature'
+  },
+  max: {
+    $max: '$calcs.observation.temperature'
+  }
+}}]
+
+
+#Nearest point
+[{$geoNear: {
+  near: {
+    type: 'Point',
+    coordinates: [
+      -73.99279,
+      40.719296
+    ]
+  },
+  distanceField: 'dist.calculated',
+  maxDistance: 200000,
+  spherical: true
+}}, {$limit: 10}, {$lookup: {
+  from: 'temperature_data',
+  localField: '_id',
+  foreignField: '_id.loc',
+  as: 'observations'
+}}]
