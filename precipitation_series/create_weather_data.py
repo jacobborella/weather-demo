@@ -6,7 +6,7 @@ import copy
 
 def gridder():
     seed(datetime.datetime.now().timestamp())
-    NUMBER_OF_DATES=4*365
+    NUMBER_OF_DATES=4*10#10 days worth of data in 6 hour intervals
     validTime=datetime.datetime(2021,3,11,0,0)                              #time the forecast is valid
     pos = 1
     lonmin = -180 #-180
