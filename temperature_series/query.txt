@@ -1,3 +1,5 @@
+#min/max/avg temperature at Svalbard
+
 [{$match: {
   countries: 'Svalbard'
 }}, {$lookup: {
@@ -33,4 +35,24 @@
   max: {
     $max: '$calcs.observation.temperature'
   }
+}}]
+
+
+#Nearest point
+[{$geoNear: {
+  near: {
+    type: 'Point',
+    coordinates: [
+      -73.99279,
+      40.719296
+    ]
+  },
+  distanceField: 'dist.calculated',
+  maxDistance: 200000,
+  spherical: true
+}}, {$limit: 10}, {$lookup: {
+  from: 'temperature_data',
+  localField: '_id',
+  foreignField: '_id.loc',
+  as: 'observations'
 }}]
