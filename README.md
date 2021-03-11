@@ -11,3 +11,9 @@ As hinted in the project name, this is nothing but a demo. None of the code is p
 * There are many different approaches to modelling weather data, of which this demo provide one approach.
 
 With that said, the demo can definitely serve as inspiration and as a starting point for your own explorations. Have fun!
+
+The project is organized into folders, each showcasing a specific time series as well as query:
+
+Type | Series | Query
+--- | --- | ---
+ [Precipitation queries](precipitation_series/) | Precipitation data with no bucketing,  | Show how to convert from cumulated precipitation data to precipitation in time intervals.

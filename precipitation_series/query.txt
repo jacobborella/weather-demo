@@ -1,0 +1,36 @@
+[{$match: {
+  countries: 'Danmark'
+}}, {$lookup: {
+  from: 'precipitation_data',
+  localField: '_id',
+  foreignField: '_id.loc',
+  as: 'docs'
+}}, {$sort: {
+  "calcs._id.loc": 1,
+  "calcs._id.validTime": 1
+}}, {$project: {
+location: "$geometry",
+docs: "$docs",
+  "calc": {
+    "$map": {
+        "input": { "$range": [ 0, {"$subtract":[{ "$size": "$docs" }, 1]} ] },
+        "as": "idx",
+        "in": {
+          precipitation: {
+           "$subtract": [
+             { "$arrayElemAt": [ "$docs.observation.precipitation", { "$add": [ "$$idx", 1 ] } ] },
+             { "$arrayElemAt": [ "$docs.observation.precipitation", "$$idx" ] }
+           ]
+          },
+          validTime: { "$arrayElemAt": [ "$docs._id.validTime", { "$add": [ "$$idx", 1 ] } ] }
+        }
+    }
+  }
+}}, {$unwind: {
+  path: "$calc"
+}}, {$project: {
+  _id:0,
+  location: "$location",
+  validTime: "$calc.validTime",
+  precipitation: "$calc.precipitation"
+}}]
