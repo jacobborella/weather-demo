@@ -24,8 +24,13 @@ def gridder():
                     "loc": str(float(lonmin)) + str(float(latmin)), 
                     "validTime": {"$date": str(startTime.isoformat()) + ".000+00:00"}
                 }, 
-                "observation": {
-                    "precipitation": randint(precipitationCumulated,precipitationCumulated+20)
+                "calc": {
+                    "precipitation": randint(precipitationCumulated,precipitationCumulated+20),
+                    "temperature": randint(-30, 40),
+                    "wind": {
+                        "u": randint(-12,22),
+                        "v": randint(-12,22)
+                      }
                 }
             }
             startTime += datetime.timedelta(hours=6)

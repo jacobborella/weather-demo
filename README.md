@@ -16,5 +16,6 @@ The project is organized into folders, each showcasing a specific time series as
 
 Type | Series | Query
 --- | --- | ---
-[Precipitation queries](precipitation_series/) | Precipitation data with no bucketing,  | Show how to convert from cumulated precipitation data to precipitation in time intervals.
-[Temperature queries](temperature_series/) | Temperature data with no bucketing,  | Show how to calculate min/max/avg from temperature data in time intervals. Also show how to calculate nearest point from a location and get a weather observation from there.
+[Precipitation queries](precipitation_series/) | Generic series generated in [ingest_weather_data](ingest_weather_data)  | Show how to convert from cumulated precipitation data to precipitation in time intervals.
+[Temperature queries](temperature_series/) | Generic series generated in [ingest_weather_data](ingest_weather_data)  | Show how to calculate min/max/avg from temperature data in time intervals. Also show how to calculate nearest point from a location and get a weather observation from there.
+[Wind series](wind_series/) | Generic series generated in [ingest_weather_data](ingest_weather_data)  | Show how to calculate wind directions based on wind speed u/v values

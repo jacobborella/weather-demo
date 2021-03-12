@@ -1,45 +1,104 @@
 [{$match: {
   countries: 'Danmark'
 }}, {$lookup: {
-  from: 'precipitation_data',
-  let: {loc_id: "$_id"},
+  from: 'weather_data',
+  'let': {
+    loc_id: '$_id'
+  },
   pipeline: [
     {
       $match: {
         $expr: {
           $and: [
-            {$eq: ["$_id.loc", "$$loc_id"]},
-            {$gte: ["$_id.validTime", ISODate('2021-03-11T06:00:00.000+00:00')]},
-            {$lte: ["$_id.validTime", ISODate('2021-04-11T06:00:00.000+00:00')]}
+            {
+              $eq: [
+                '$_id.loc',
+                '$$loc_id'
+              ]
+            },
+            {
+              $gte: [
+                '$_id.validTime',
+                ISODate('2021-03-11T06:00:00.000Z')
+              ]
+            },
+            {
+              $lte: [
+                '$_id.validTime',
+                ISODate('2021-04-11T06:00:00.000Z')
+              ]
+            }
           ]
         }
       }
     },
-    {$sort: {"_id.validTime":1}}],
+    {
+      $sort: {
+        '_id.validTime': 1
+      }
+    }
+  ],
   as: 'docs'
 }}, {$project: {
-location: "$geometry",
-docs: "$docs",
-  "calc": {
-    "$map": {
-        "input": { "$range": [ 0, {"$subtract":[{ "$size": "$docs" }, 1]} ] },
-        "as": "idx",
-        "in": {
-          precipitation: {
-           "$subtract": [
-             { "$arrayElemAt": [ "$docs.observation.precipitation", { "$add": [ "$$idx", 1 ] } ] },
-             { "$arrayElemAt": [ "$docs.observation.precipitation", "$$idx" ] }
-           ]
-          },
-          validTime: { "$arrayElemAt": [ "$docs._id.validTime", { "$add": [ "$$idx", 1 ] } ] }
+  location: '$geometry',
+  docs: '$docs',
+  calc: {
+    $map: {
+      input: {
+        $range: [
+          0,
+          {
+            $subtract: [
+              {
+                $size: '$docs'
+              },
+              1
+            ]
+          }
+        ]
+      },
+      as: 'idx',
+      'in': {
+        precipitation: {
+          $subtract: [
+            {
+              $arrayElemAt: [
+                '$docs.calc.precipitation',
+                {
+                  $add: [
+                    '$$idx',
+                    1
+                  ]
+                }
+              ]
+            },
+            {
+              $arrayElemAt: [
+                '$docs.calc.precipitation',
+                '$$idx'
+              ]
+            }
+          ]
+        },
+        validTime: {
+          $arrayElemAt: [
+            '$docs._id.validTime',
+            {
+              $add: [
+                '$$idx',
+                1
+              ]
+            }
+          ]
         }
+      }
     }
   }
 }}, {$unwind: {
-  path: "$calc"
+  path: '$calc'
 }}, {$project: {
-  _id:0,
-  location: "$location",
-  validTime: "$calc.validTime",
-  precipitation: "$calc.precipitation"
+  _id: 0,
+  location: '$location',
+  validTime: '$calc.validTime',
+  precipitation: '$calc.precipitation'
 }}]
