@@ -1,6 +1,3 @@
 #!/bin/bash
-python3 create_grid.py | mongoimport --uri "mongodb+srv://cluster0.vortb.mongodb.net/weather" --username main_user --password $MDB_PSWD --drop --collection weather_grid --jsonArray
-python3 create_weather_data.py | mongoimport --uri "mongodb+srv://cluster0.vortb.mongodb.net/weather" --username main_user --password $MDB_PSWD --drop --collection weather_data --jsonArray
-
-cat add_metadata.mdb | mongo "mongodb+srv://cluster0.vortb.mongodb.net/weather" --username main_user --password $MDB_PSWD
-#TODO: create index on precipitation_data {'_id.loc': 1}
+python3 insert_full_by_ref.py tmp2m.01.2021021412.daily.grb2 true | mongoimport --uri "mongodb+srv://main_user:$MDB_PSWD@cluster0.vortb.mongodb.net/weather" --drop --collection grb_grid --jsonArray
+python3 insert_full_by_ref.py tmp2m.01.2021021412.daily.grb2 false | mongoimport --uri "mongodb+srv://main_user:$MDB_PSWD@cluster0.vortb.mongodb.net/weather" --drop --collection grb_data --jsonArray
